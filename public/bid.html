@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Place Your Bid</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .bid-box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      font-size: 1.8rem;
+      color: #333;
+    }
+
+    .current-bid {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: #555;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 8px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="bid-box">
+    <h2 id="itemTitle">Loading...</h2>
+    <div class="current-bid">
+      Current Highest Bid: ₹<span id="highestBid">--</span>
+    </div>
+    <input type="number" id="userBid" placeholder="Enter your bid" />
+    <br/>
+    <button onclick="placeBid()">Place Bid</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3I-4nBT08ZFXO-dxdABqmCKa94SBUOgc",
+      authDomain: "auction-hive-c9879.firebaseapp.com",
+      projectId: "auction-hive-c9879",
+      storageBucket: "auction-hive-c9879.appspot.com",
+      messagingSenderId: "558929162744",
+      appId: "1:558929162744:web:a16c038f136a1d6cc3660d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const auctionId = params.get("id");
+
+    // Your hardcoded seller phone number (in international format, no + sign)
+    const sellerPhone = "916302656221";
+
+    let itemName = "";
+    let currentBid = 0;
+
+    async function loadAuctionDetails() {
+      const docRef = doc(db, "Auctions", auctionId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        itemName = data.title || "Auction Item";
+        currentBid = data.currentBid || data.startingBid || 0;
+
+        document.getElementById("itemTitle").textContent = itemName;
+        document.getElementById("highestBid").textContent = currentBid;
+      } else {
+        document.getElementById("itemTitle").textContent = "Item not found";
+      }
+    }
+
+    loadAuctionDetails();
+
+    window.placeBid = function () {
+      const bidAmount = parseFloat(document.getElementById("userBid").value);
+
+      if (isNaN(bidAmount) || bidAmount <= currentBid) {
+        alert("Please enter a valid bid higher than ₹" + currentBid);
+        return;
+      }
+
+      const message = `Hi, I want to bid ₹${bidAmount} for "${itemName}".`;
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappURL = `https://wa.me/${sellerPhone}?text=${encodedMessage}`;
+      window.location.href = whatsappURL;
+    };
+  </script>
+</body>
+</html>

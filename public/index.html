@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Auction Hive - Home</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 {
+      color: #333;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      transition: background-color 0.3s;
+      width: 100%;
+      max-width: 250px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .admin-button {
+      background-color: #dc3545;
+    }
+    .admin-button:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Auction Hive</h1>
+    <button onclick="window.location.href='auctions.html'">View Auctions</button><br>
+    <button onclick="window.location.href='sell.html'">Sell an Item</button><br>
+    <button class="admin-button" onclick="window.location.href='login.html'">Admin Panel</button>
+  </div>
+</body>
+</html>

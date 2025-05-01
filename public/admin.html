@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Auction Hive - Admin Panel</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .container {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+  overflow-y: auto; /* Allow scrolling if content exceeds height */
+  max-height: 90vh; /* Set a maximum height for the container */
+}
+
+    h1 {
+      color: #333;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    section {
+      margin-bottom: 30px;
+    }
+
+    section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: #555;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .auction-item {
+  background-color: #f9f9f9;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: transform 0.2s; /* Add a transition for hover effect */
+}
+
+    .auction-item h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #333;
+    }
+
+    .auction-item p {
+      margin: 5px 0;
+    }
+
+    .auction-item button {
+      background-color: #dc3545;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .auction-item:hover {
+  transform: scale(1.02); /* Slightly scale up on hover */
+}
+
+    .auction-item button:hover {
+      background-color: #c82333;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007bff;
+      font-size: 1rem;
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    a:hover {
+      color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Admin Panel</h1>
+
+    <!-- Add Auction Section -->
+    <section>
+      <h2>Add Auction</h2>
+      <input type="text" id="itemName" placeholder="Item Name" required />
+      <textarea id="itemDesc" placeholder="Item Description" rows="4" required></textarea>
+      <input type="number" id="startBid" placeholder="Starting Bid ₹" required />
+      <input type="text" id="duration" placeholder="Auction Duration (in hours)" required />
+      <button id="addBtn">Add Auction</button>
+    </section>
+
+    <hr />
+
+    <!-- Delete Auction Section -->
+    <section>
+      <h2>Delete Auctions</h2>
+      <div id="auctionList"></div>
+    </section>
+
+    <br>
+    <a href="index.html">← Back to Home</a>
+  </div>
+
+  <script type="module">
+
+    // Firebase setup (inlined instead of using firebase.js)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3I-4nBT08ZFXO-dxdABqmCKa94SBUOgc",
+      authDomain: "auction-hive-c9879.firebaseapp.com",
+      projectId: "auction-hive-c9879",
+      storageBucket: "auction-hive-c9879.appspot.com",
+      messagingSenderId: "558929162744",
+      appId: "1:558929162744:web:a16c038f136a1d6cc3660d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auctionCollection = collection(db, "Auctions");
+
+    document.getElementById("addBtn").addEventListener("click", async () => {
+      const name = document.getElementById("itemName").value.trim();
+      const desc = document.getElementById("itemDesc").value.trim();
+      const startBid = document.getElementById("startBid").value.trim();
+      const duration = document.getElementById("duration").value.trim();
+
+      if (!name || !desc || !startBid || !duration || isNaN(duration) || Number(duration) <= 0) {
+        alert("Please fill all fields with valid data.");
+        return;
+      }
+
+      const currentDate = new Date();
+      const endDate = new Date();
+      endDate.setHours(currentDate.getHours() + Number(duration));
+
+      try {
+        await addDoc(auctionCollection, {
+          title: name,
+          description: desc,
+          startingBid: startBid,
+          startTime: currentDate.toLocaleString('en-US', { hour12: true }),
+          endTime: endDate.toLocaleString('en-US', { hour12: true })
+        });
+
+        alert("Auction added!");
+        loadAuctions();
+      } catch (err) {
+        alert("Error adding auction: " + err.message);
+      }
+    });
+
+    async function loadAuctions() {
+      const auctionList = document.getElementById("auctionList");
+      auctionList.innerHTML = "";
+
+      const snapshot = await getDocs(auctionCollection);
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "auction-item";
+        div.innerHTML = `
+          <h3>${data.title}</h3>
+          <p>${data.description}</p>
+          <p><strong>Starting Bid:</strong> ₹${data.startingBid}</p>
+          <p><strong>Start Time:</strong> ${data.startTime}</p>
+          <p><strong>End Time:</strong> ${data.endTime}</p>
+          <button data-id="${docSnap.id}">Delete</button>
+        `;
+        div.querySelector("button").addEventListener("click", async () => {
+          if (confirm(`Delete "${data.title}"?`)) {
+            await deleteDoc(doc(auctionCollection, docSnap.id));
+            alert("Deleted.");
+            loadAuctions();
+          }
+        });
+        auctionList.appendChild(div);
+      });
+    }
+
+    loadAuctions();
+  </script>
+</body>
+</html>

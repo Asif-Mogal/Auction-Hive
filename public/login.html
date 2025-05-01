@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login - Auction Hive</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Admin Login</h1>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Enter your email" required />
+      <input type="password" id="password" placeholder="Enter your password" required />
+      <button type="submit">Login</button>
+    </form>
+    <p id="error-message" style="color: red; display: none;">Invalid email or password. Please try again.</p>
+    <br>
+    <a href="index.html">← Back to Home</a>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3I-4nBT08ZFXO-dxdABqmCKa94SBUOgc",
+      authDomain: "auction-hive-c9879.firebaseapp.com",
+      projectId: "auction-hive-c9879",
+      storageBucket: "auction-hive-c9879.appspot.com",
+      messagingSenderId: "558929162744",
+      appId: "1:558929162744:web:a16c038f136a1d6cc3660d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const form = document.getElementById("loginForm");
+    const errorMessage = document.getElementById("error-message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault(); // Stop the form from submitting normally
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // Login success
+        window.location.href = 'admin.html';
+      } catch (error) {
+        // Login failed
+        console.error("Login error:", error.message);
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = "Invalid email or password. Please try again.";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sell Item - Auction Hive</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Sell Your Item</h1>
+
+    <input type="text" id="itemName" placeholder="Item Name" required />
+    <textarea id="itemDesc" placeholder="Item Description" rows="4" required></textarea>
+    <input type="number" id="startBid" placeholder="Starting Bid ₹" required />
+    <input type="text" id="duration" placeholder="Auction Duration (in hours)" required />
+    <button id="sellBtn">Sell</button><br>
+    <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
+  </div>
+    <p id="error-message" style="color: red; display: none;"></p>
+  </div>
+
+  <script type="module">
+    // Firebase SDK imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3I-4nBT08ZFXO-dxdABqmCKa94SBUOgc",
+      authDomain: "auction-hive-c9879.firebaseapp.com",
+      projectId: "auction-hive-c9879",
+      storageBucket: "auction-hive-c9879.appspot.com",
+      messagingSenderId: "558929162744",
+      appId: "1:558929162744:web:a16c038f136a1d6cc3660d"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById("sellBtn").addEventListener("click", async () => {
+      const name = document.getElementById("itemName").value.trim();
+      const desc = document.getElementById("itemDesc").value.trim();
+      const startBid = document.getElementById("startBid").value.trim();
+      const duration = document.getElementById("duration").value.trim();
+      const errorMsg = document.getElementById("error-message");
+
+      if (!name || !desc || !startBid || !duration) {
+        errorMsg.textContent = "Please fill out all fields!";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      // Send item data to Firestore
+      try {
+        const now = new Date();
+        const endTime = new Date(now.getTime() + parseInt(duration) * 60 * 60 * 1000);
+
+        await addDoc(collection(db, "auctions"), {
+          title: name,
+          description: desc,
+          startingBid: parseFloat(startBid),
+          startTime: now.toISOString(),
+          endTime: endTime.toISOString(),
+          sellerPhone: "916302656221",
+          createdAt: serverTimestamp()
+        });
+
+        // Redirect to WhatsApp with confirmation
+        const message = `*Auction Details*\n\n` +
+                        `*Item Name*: ${name}\n` +
+                        `*Description*: ${desc}\n` +
+                        `*Starting Bid*: ₹${startBid}\n` +
+                        `*Duration*: ${duration} hours\n\n`;
+
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/916302656221?text=${encodedMessage}`;
+        window.open(whatsappUrl, "_blank");
+      } catch (e) {
+        errorMsg.textContent = "Error listing item: " + e.message;
+        errorMsg.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
