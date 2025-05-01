@@ -6,96 +6,99 @@
   <title>Auction Hive - Auctions</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    /* Global styles for Live Auctions page */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #1d1f21;
+  color: #e6e6e6;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-    .container {
-  background-color: #fff;
+.container {
+  background-color: #2b2f36;
   padding: 40px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   text-align: center;
   max-width: 800px;
   width: 100%;
-  overflow-y: auto; /* Allow scrolling if content exceeds height */
-  max-height: 90vh; /* Set a maximum height for the container */
+  overflow-y: auto;
+  max-height: 90vh;
 }
 
-    h1 {
-      color: #333;
-      font-size: 2.5rem;
-      margin-bottom: 30px;
-      font-weight: 600;
-    }
+h1 {
+  color: #4b9cd3;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
 
-    .auction-item {
-      background-color: #f9f9f9;
-      margin-bottom: 20px;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-    }
+.auction-item {
+  background-color: #333;
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
 
-    .auction-item:hover {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+.auction-item:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 
-    .auction-item h3 {
-      color: #333;
-      font-size: 1.6rem;
-      margin-bottom: 10px;
-    }
+.auction-item h3 {
+  color: #4b9cd3;
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
 
-    .auction-item p {
-      color: #555;
-      font-size: 1rem;
-      margin-bottom: 10px;
-    }
+.auction-item p {
+  color: #e6e6e6;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
 
-    button {
-      background-color: #007bff;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.3s;
-    }
+button {
+  background-color: #4b9cd3;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
 
-    button:hover {
-      background-color: #0056b3;
-    }
+button:hover {
+  background-color: #357bbd;
+}
 
-    .bid-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.bid-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-    .back-btn {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+.back-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4b9cd3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-    .back-btn:hover {
-      background-color: #0056b3;
-    }
+.back-btn:hover {
+  background-color: #357bbd;
+}
+
   </style>
 </head>
 <body>
@@ -107,8 +110,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  
     const firebaseConfig = {
       apiKey: "AIzaSyB3I-4nBT08ZFXO-dxdABqmCKa94SBUOgc",
       authDomain: "auction-hive-c9879.firebaseapp.com",
@@ -117,42 +120,40 @@
       messagingSenderId: "558929162744",
       appId: "1:558929162744:web:a16c038f136a1d6cc3660d"
     };
-
+  
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
+  
     const auctionList = document.getElementById("auctionList");
-
-    async function fetchAuctions() {
-      try {
-        const querySnapshot = await getDocs(collection(db, "Auctions"));
-        if (querySnapshot.empty) {
-          auctionList.innerHTML = "<p>No auctions available.</p>";
-        } else {
-          querySnapshot.forEach((doc) => {
-            const auctionData = doc.data();
-            const auctionDiv = document.createElement("div");
-            auctionDiv.className = "auction-item";
-            auctionDiv.innerHTML = `
-              <h3>${auctionData.title}</h3>
-              <p>${auctionData.description}</p>
-              <p><strong>Starting Bid:</strong> ₹${auctionData.startingBid}</p>
-              <p><strong>Auction started at:</strong> ${auctionData.startTime}</p>
-              <p><strong>Auction ends at:</strong> ${auctionData.endTime}</p>
-              <div class="bid-container">
-                <button onclick="window.location.href='bid.html?id=${doc.id}'">Bid</button>
-              </div>
-            `;
-            auctionList.appendChild(auctionDiv);
-          });
-        }
-      } catch (e) {
-        console.error("Error fetching auctions: ", e);
-        auctionList.innerHTML = "<p>There was an error loading auctions. Please try again later.</p>";
+  
+    // Real-time updates using onSnapshot
+    onSnapshot(collection(db, "Auctions"), (querySnapshot) => {
+      auctionList.innerHTML = "";  // Clear current auctions
+      if (querySnapshot.empty) {
+        auctionList.innerHTML = "<p>No auctions available.</p>";
+      } else {
+        querySnapshot.forEach((doc) => {
+          const auctionData = doc.data();
+          const auctionDiv = document.createElement("div");
+          auctionDiv.className = "auction-item";
+          auctionDiv.innerHTML = `
+            <h3>${auctionData.title}</h3>
+            <p>${auctionData.description}</p>
+            <p><strong>Starting Bid:</strong> ₹${auctionData.startingBid}</p>
+            <p><strong>Auction started at:</strong> ${new Date(auctionData.startTime).toLocaleString()}</p>
+            <p><strong>Auction ends at:</strong> ${new Date(auctionData.endTime).toLocaleString()}</p>
+            <div class="bid-container">
+              <button onclick="window.location.href='bid.html?id=${doc.id}'">Bid</button>
+            </div>
+          `;
+          auctionList.appendChild(auctionDiv);
+        });
       }
-    }
-    fetchAuctions();
-  </script>
+    }, (error) => {
+      console.error("Error fetching auctions: ", error);
+      auctionList.innerHTML = "<p>There was an error loading auctions. Please try again later.</p>";
+    });
+  </script>  
 </body>
 </html>
