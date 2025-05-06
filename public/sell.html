@@ -33,7 +33,7 @@
 
     .container {
       background-color: white;
-      padding: 70px;
+      padding: 40px;
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       text-align: center;
@@ -191,6 +191,39 @@
         flex-direction: column;
       }
     }
+
+    /* Add these new mobile-specific styles */
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+    align-items: flex-start; /* Better for small screens */
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    font-size: 0.9rem;
+  }
+  
+  #error-message, 
+  #success-message {
+    font-size: 0.9rem;
+    padding: 10px;
+    margin-top: 15px;
+  }
+  
+  /* Prevent input zoom on focus */
+  input, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Add this to prevent double-tap zoom */
+html {
+  touch-action: manipulation;
+}
   </style>
 </head>
 <body>
